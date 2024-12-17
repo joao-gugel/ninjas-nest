@@ -3,10 +3,13 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
+  ValidationPipe,
 } from '@nestjs/common';
 
 import { CreateNinjaDto } from './dto/create-ninja-dto';
@@ -24,22 +27,29 @@ export class NinjasController {
   }
 
   @Get(':id')
-  getOneNinja(@Param('id') id: number) {
-    return this.ninjasService.getNinjaById(id);
+  getOneNinja(@Param('id', ParseIntPipe) id: number) {
+    try {
+      return this.ninjasService.getNinjaById(id);
+    } catch (error) {
+      throw new NotFoundException();
+    }
   }
 
   @Post()
-  createNinja(@Body() createNinjaDto: CreateNinjaDto) {
+  createNinja(@Body(new ValidationPipe()) createNinjaDto: CreateNinjaDto) {
     return this.ninjasService.createNinja(createNinjaDto);
   }
 
   @Put(':id')
-  updateNinja(@Param('id') id: number, @Body() updateNinjaDto: UpdateNinjaDto) {
+  updateNinja(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateNinjaDto: UpdateNinjaDto,
+  ) {
     return this.ninjasService.updateNinja(id, updateNinjaDto);
   }
 
   @Delete(':id')
-  deleteNinja(@Param('id') id: number) {
+  deleteNinja(@Param('id', ParseIntPipe) id: number) {
     return this.ninjasService.removeNinja(id);
   }
 }
